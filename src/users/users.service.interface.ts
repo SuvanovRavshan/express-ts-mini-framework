@@ -6,4 +6,5 @@ import { UserModel } from '@prisma/client';
 export interface IUsersService {
 	createUser: (dto: UserRegisterDto) => Promise<UserModel | null>;
 	validateUser: (dto: UserLoginDto) => Promise<boolean>;
+	findUser: (email: string) => Promise<UserModel | null>;
 }
