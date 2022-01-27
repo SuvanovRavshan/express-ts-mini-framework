@@ -24,19 +24,27 @@ export class UsersController extends BaseController implements IUserController {
 				name: this.constructor.name,
 				middlewares: [new ValidateMiddleware(UserRegisterDto)],
 			},
-			{ path: '/login', method: 'post', func: this.login, name: this.constructor.name },
+			{
+				path: '/login',
+				method: 'post',
+				func: this.login,
+				name: this.constructor.name,
+				middlewares: [new ValidateMiddleware(UserRegisterDto)],
+			},
 		]);
 	}
 
-	login({ body }: Request<{}, {}, UserLoginDto>, res: Response, next: NextFunction): void {
-
-		next(new HTTPError(401, 'unauthorized', 'Permission error'));
+	async login({ body }: Request<{}, {}, UserLoginDto>, res: Response, next: NextFunction): Promise<void> {
+		const result = await this.usersService.validateUser(body);
+		if (!result)
+			return next(new HTTPError(401, 'unauthorized', 'Permission error'));
+		this.ok(res, {  });
 	}
 
 	async register({ body }: Request<{}, {}, UserRegisterDto>, res: Response, next: NextFunction): Promise<void> {
 		const result = await this.usersService.createUser(body);
 		if (!result)
 			return next(new HTTPError(422, 'email already exist'));
-		this.ok(res, { email: result.email });
+		this.ok(res, { email: result.email, id: result.id });
 	}
 }
